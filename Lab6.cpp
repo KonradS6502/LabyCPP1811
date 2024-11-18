@@ -13,13 +13,13 @@ public:
 
 class Gate : public IGate {
 public:
-	Gate(std::map<int, int>& nodes) : node(nodes){};
+	Gate(std::map<int, int>* nodes) : node(nodes){};
 	virtual ~Gate() = default;
-	std::map<int, int> Get_map(void) {
+	std::map<int, int>* Get_map(void) {
 		return node;
 	}
 private:
-	std::map<int, int> node;
+	std::map<int, int>* node;
 };
 
 class AndGate : public Gate {
@@ -28,12 +28,14 @@ public:
 	int index_input2;
 	int index_output;
 	int evaluate() override {
-		if (Get_map()[index_input1] == -1 || Get_map()[index_input2] == -1) {
+		if ((*Get_map())[index_input1] == -1 || (*Get_map())[index_input2] == -1) {
+			(*Get_map())[index_output] = -1;
 			return -1;
 		}
 
 		else {
-			return(Get_map()[index_input1] & Get_map()[index_input2]);
+			(*Get_map())[index_output] = (*Get_map())[index_input1] & (*Get_map())[index_input2];
+			return((*Get_map())[index_input1] & (*Get_map())[index_input2]);
 		}
 
 	};
@@ -42,7 +44,7 @@ public:
 	void print() const override {
 		std::cout << index_input1 <<"_" << index_input2 << "_" << index_output << "\n";
 	}
-	AndGate(int ii1, int ii2, int io, std::map<int, int>& nodes) : index_input1(ii1), index_input2(ii2), index_output(io), Gate(nodes) {};
+	AndGate(int ii1, int ii2, int io, std::map<int, int>* nodes) : index_input1(ii1), index_input2(ii2), index_output(io), Gate(nodes) {};
 	virtual ~AndGate() = default;
 private:
 };
@@ -54,12 +56,14 @@ public:
 	int index_input2;
 	int index_output;
 	int evaluate() override {
-		if (Get_map()[index_input1] == -1 || Get_map()[index_input2] == -1) {
+		if ((*Get_map())[index_input1] == -1 || (*Get_map())[index_input2] == -1) {
+			(*Get_map())[index_output] = -1;
 			return -1;
 		}
 
 		else {
-			return(Get_map()[index_input1] | Get_map()[index_input2]);
+			(*Get_map())[index_output] = (*Get_map())[index_input1] | (*Get_map())[index_input2];
+			return((*Get_map())[index_input1] | (*Get_map())[index_input2]);
 		}
 
 	};
@@ -68,7 +72,7 @@ public:
 	void print() const override {
 		std::cout << index_input1 << "_" << index_input2 << "_" << index_output << "\n";
 	}
-	OrGate(int ii1, int ii2, int io, std::map<int, int>& nodes) : index_input1(ii1), index_input2(ii2), index_output(io), Gate(nodes) {};
+	OrGate(int ii1, int ii2, int io, std::map<int, int>* nodes) : index_input1(ii1), index_input2(ii2), index_output(io), Gate(nodes) {};
 	virtual ~OrGate() = default;
 private:
 };
@@ -80,12 +84,19 @@ public:
 	int index_input2;
 	int index_output;
 	int evaluate() override {
-		if (Get_map()[index_input1] == -1 || Get_map()[index_input2] == -1) {
+		if ((*Get_map())[index_input1] == -1 || (*Get_map())[index_input2] == -1) {
+			(*Get_map())[index_output] = -1;
 			return -1;
 		}
 
 		else {
-			return(Get_map()[index_input1] ^ Get_map()[index_input2]);
+			if ((*Get_map())[index_input1] == (*Get_map())[index_input2]) {
+				(*Get_map())[index_output] = 0;
+			}
+			else {
+				(*Get_map())[index_output] = 1;
+			}
+			return(((*Get_map())[index_output]));
 		}
 
 	};
@@ -94,7 +105,7 @@ public:
 	void print() const override {
 		std::cout << index_input1 << "_" << index_input2 << "_" << index_output << "\n";
 	}
-	XorGate(int ii1, int ii2, int io, std::map<int, int>& nodes) : index_input1(ii1), index_input2(ii2), index_output(io), Gate(nodes) {};
+	XorGate(int ii1, int ii2, int io, std::map<int, int>* nodes) : index_input1(ii1), index_input2(ii2), index_output(io), Gate(nodes) {};
 	virtual ~XorGate() = default;
 private:
 };
@@ -105,12 +116,20 @@ public:
 	int index_input1;
 	int index_output;
 	int evaluate() override {
-		if (Get_map()[index_input1] == -1) {
+		if ((*Get_map())[index_input1] == -1) {
+			(*Get_map())[index_output] = -1;
 			return -1;
 		}
 
 		else {
-			return(~Get_map()[index_input1]);
+			if ((*Get_map())[index_input1] == 0) {
+				(*Get_map())[index_output] = 1;
+			}
+			else {
+				(*Get_map())[index_output] = 0;
+			}
+			
+			return((*Get_map())[index_output]);
 		}
 
 	};
@@ -119,7 +138,7 @@ public:
 	void print() const override {
 		std::cout << index_input1 << "_" << index_output << "\n";
 	}
-	NotGate(int ii1, int io, std::map<int, int>& nodes) : index_input1(ii1), index_output(io), Gate(nodes) {};
+	NotGate(int ii1, int io, std::map<int, int>* nodes) : index_input1(ii1), index_output(io), Gate(nodes) {};
 	virtual ~NotGate() = default;
 private:
 };
@@ -151,13 +170,13 @@ int main()
 			std::cin >> temp_str;
 			int index_output = std::stoi(temp_str);
 			if (gate_name_str == "and") {
-				gates.emplace_back(std::make_shared<AndGate>(index_input1, index_input2, index_output, nodes));
+				gates.emplace_back(std::make_shared<AndGate>(index_input1, index_input2, index_output, &nodes));
 			}
 			else if (gate_name_str == "or") {
-				gates.emplace_back(std::make_shared<OrGate>(index_input1, index_input2, index_output, nodes));
+				gates.emplace_back(std::make_shared<OrGate>(index_input1, index_input2, index_output, &nodes));
 			}
 			else if (gate_name_str == "xor") {
-				gates.emplace_back(std::make_shared<XorGate>(index_input1, index_input2, index_output, nodes));
+				gates.emplace_back(std::make_shared<XorGate>(index_input1, index_input2, index_output, &nodes));
 			}
 			}
 
@@ -166,7 +185,7 @@ int main()
 			int index_input = std::stoi(temp_str);
 			std::cin >> temp_str;
 			int index_output = std::stoi(temp_str);
-			gates.emplace_back(std::make_unique<NotGate>(index_input, index_output, nodes));
+			gates.emplace_back(std::make_shared<NotGate>(index_input, index_output, &nodes));
 		}
 
 	}
@@ -184,14 +203,16 @@ int main()
 			nodes[node_index] = node_state;
 		}
 	}
-	for (auto i = 0; i < gates.size(); i++) {
-		int evaluation_state = gates[i]->evaluate();
-		std::cout << "Stan:"<< evaluation_state << "\n";
-		if (evaluation_state == -1) {
-			i = 0;
+	for (auto it : nodes) {
+		for (auto i = 0; i < gates.size(); i++) {
+			int evaluation_state = gates[i]->evaluate();
+			std::cout << "Stan:" << evaluation_state << "\n";
+			if (evaluation_state == -1) {
+				i = 0;
+			}
 		}
+		print_nodes(nodes);
 	}
-	print_nodes(nodes);
 	
 }
 
