@@ -191,27 +191,23 @@ int main()
 	}
 	
 
-	while (1) {
-		std::cin >> temp_str;
-		int node_index = std::stoi(temp_str);
-		if (node_index == -1) {
-			break;
-		}
-		else {
-			std::cin >> temp_str;
-			int node_state = std::stoi(temp_str);
-			nodes[node_index] = node_state;
-		}
-	}
-	for (auto it : nodes) {
-		for (auto i = 0; i < gates.size(); i++) {
-			int evaluation_state = gates[i]->evaluate();
-			std::cout << "Stan:" << evaluation_state << "\n";
-			if (evaluation_state == -1) {
-				i = 0;
+
+	int counter = 0;
+	for (auto it = 0; it < 8; it++) {
+		
+		for (int n = 0; n < 3; n++) {
+
+			nodes[n] = (counter >> n) & 0b1;
+			for (auto i = 0; i < gates.size(); i++) {
+				int evaluation_state = gates[i]->evaluate();
+				std::cout << "Stan:" << evaluation_state << "\n";
+				if (evaluation_state == -1) {
+					i = 0;
+				}
 			}
+			print_nodes(nodes);
 		}
-		print_nodes(nodes);
+		counter++;
 	}
 	
 }
